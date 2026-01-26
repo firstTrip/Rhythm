@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72cbe4d36165264a92b8ada6c683837, type: 3}
+  m_Name: StageData
+  m_EditorClassIdentifier: 
+  stageName: 1
+  stageBGM: {fileID: 0}
+  waves:
+  - waveName: 1
+    startTime: 0
+    endTime: 5
+    spawnInterval: 0
+    monsterDataList:
+    - {fileID: 11400000, guid: ee108b47c70487d4a932199f798e78b5, type: 2}
+  - waveName: 2
+    startTime: 5
+    endTime: 15
+    spawnInterval: 0
+    monsterDataList:
+    - {fileID: 11400000, guid: ee108b47c70487d4a932199f798e78b5, type: 2}
+    - {fileID: 11400000, guid: 4f184010597733142a7305a29dd727c1, type: 2}
+  - waveName: 3
+    startTime: 15
+    endTime: 50
+    spawnInterval: 0
+    monsterDataList:
+    - {fileID: 11400000, guid: 4f184010597733142a7305a29dd727c1, type: 2}
+  finalBossKey: 
+  bossSpawnTime: 300
+  healthMultiplierPerMin: 1.1
+  damageMultiplierPerMin: 1.05
