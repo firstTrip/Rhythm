@@ -6,7 +6,7 @@ public class GameManager : MonoSingleton<GameManager>
     [Header("Game Settings")]
     public float bpm = 120f;
     public float stageTime = 180f;
-
+    public Color[] beatColors = { Color.red, Color.blue, Color.green, Color.yellow };
     [Header("Initial Pattern")]
     public NoteDivision[] startingPattern = { NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter };
 
@@ -14,7 +14,25 @@ public class GameManager : MonoSingleton<GameManager>
 
     void Start()
     {
-        StartNewStage();
+        NoteDivision[] startPattern = { NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter };
+
+        BeatTemplate[] templates = new BeatTemplate[4];
+
+        // 2. ∞¢ ø‰º“ø° Ω«¡¶ ∞¥√º «“¥Á (¿Ã ∞˙¡§¿ª ª©∏‘¿∏∏È null¿Ã µ )
+        for (int i = 0; i < templates.Length; i++)
+        {
+            templates[i] = new BeatTemplate();
+            templates[i].laneIndex = i;
+            templates[i].color = beatColors[i];
+        }
+
+        var timeline = RhythmGenerator.Instance.Build(180f, 120f, startPattern, templates);
+
+        RhythmEngine.Instance.InitEngine(timeline);
+
+        RhythmClock.Instance.StartClock();
+
+        RhythmCircleVisualizer.Instance.PrepareNotes(timeline);
     }
 
     public void StartNewStage()
