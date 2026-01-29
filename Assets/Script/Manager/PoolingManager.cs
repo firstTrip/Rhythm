@@ -11,7 +11,7 @@ public enum PoolType
 
 public class PoolingManager : MonoSingleton<PoolingManager>
 {
-    [SerializeField] private PoolingSetting poolingSetting; // 인스펙터에서 할당
+    [SerializeField] private PoolingSetting poolingSetting;
 
     private Dictionary<string, Queue<GameObject>> _pools = new();
     private Dictionary<string, GameObject> _prefabMap = new();
@@ -19,20 +19,16 @@ public class PoolingManager : MonoSingleton<PoolingManager>
     protected override void Awake()
     {
         base.Awake();
-        // 게임 시작 시 자동으로 풀링 초기화
         InitializePools();
     }
 
     private void InitializePools()
     {
-        // 1. 몬스터 그룹 풀링 (종속 이펙트 포함)
         foreach (var group in poolingSetting.monsterGroups)
         {
-            // 몬스터 본체 풀링
             _prefabMap[group.monsterName] = group.monsterPrefab;
             CreatePool(group.monsterName, group.monsterPrefab, group.preloadCount);
 
-            // 종속된 이펙트들 풀링
             foreach (var effect in group.relatedEffects)
             {
                 _prefabMap[effect.name] = effect.prefab;
@@ -40,7 +36,6 @@ public class PoolingManager : MonoSingleton<PoolingManager>
             }
         }
 
-        // 2. 공통 아이템 풀링
         foreach (var common in poolingSetting.commonPools)
         {
             _prefabMap[common.name] = common.prefab;
@@ -79,14 +74,13 @@ public class PoolingManager : MonoSingleton<PoolingManager>
             for (int i = 0; i < item.preloadCount; i++)
             {
                 GameObject obj = Instantiate(item.prefab, transform);
-                obj.name = key; // 식별을 위해 이름 고정
+                obj.name = key;
                 obj.SetActive(false);
                 _pools[key].Enqueue(obj);
             }
         }
     }
 
-    // 기존 Get, Release 함수는 그대로 사용하되 key를 이름으로 처리
     public GameObject Get(string key, Vector3 pos, Quaternion rot)
     {
         if (!_pools.ContainsKey(key))
@@ -95,7 +89,6 @@ public class PoolingManager : MonoSingleton<PoolingManager>
             return null;
         }
 
-        // 큐가 비어있다면 새로 생성 (동적 확장)
         if (_pools[key].Count == 0)
         {
             if (_prefabMap.TryGetValue(key, out GameObject prefab))
@@ -110,7 +103,6 @@ public class PoolingManager : MonoSingleton<PoolingManager>
             }
         }
 
-        // 이제 무조건 오브젝트가 존재함
         GameObject obj = _pools[key].Dequeue();
         obj.transform.SetPositionAndRotation(pos, rot);
         obj.SetActive(true);
