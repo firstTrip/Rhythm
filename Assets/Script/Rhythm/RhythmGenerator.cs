@@ -7,6 +7,7 @@ public class RhythmGenerator : MonoSingleton<RhythmGenerator>
     private BeatTemplate[] _currentTemplates;
 
     public List<RhythmCircle> currentTimeline;
+    public Color[] beatColors = { Color.red, Color.blue, Color.green, Color.yellow };
 
     public List<BeatTemplate[]> beatTemplates;
 
@@ -38,6 +39,7 @@ public class RhythmGenerator : MonoSingleton<RhythmGenerator>
             {
                 var bar = new BarData();
                 bar.startTime = timeCursor;
+                bar.barColor = beatColors[b];
 
                 float subCursor = timeCursor;
                 int lane = 0;

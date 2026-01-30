@@ -10,6 +10,11 @@ public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
     private List<UINoteCircle> _activeNotes = new List<UINoteCircle>();
     private List<SubBeatData> _flatNotes = new List<SubBeatData>();
 
+    [SerializeField] private float spawnAheadTime = 1.0f; // 노트를 실제 시간보다 얼마나 미리 생성할지
+
+    // 마디(BarData)를 키값으로 하여, 그 마디에 속한 UI 원(UINoteCircle)들을 리스트로 관리합니다.
+    private Dictionary<BarData, List<UINoteCircle>> _activeBars = new Dictionary<BarData, List<UINoteCircle>>();
+
     private int _spawnIndex = 0;
 
     public void PrepareNotes(List<RhythmCircle> timeline)
@@ -24,36 +29,40 @@ public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
 
     void Update()
     {
-        if (!RhythmClock.Instance.IsRunning) return;
+        if (RhythmEngine.Instance._flattenedBars == null) return;
 
-        float currentTime = RhythmClock.Instance.ElapsedTime;
-
-        // 1. 소환 로직
-        while (_spawnIndex < _flatNotes.Count && _flatNotes[_spawnIndex].time < currentTime + lookAheadTime)
+        float now = RhythmClock.Instance.ElapsedTime;
+        CheckAndSpawnBars(now);
+    }
+    private void CheckAndSpawnBars(float currentTime)
+    {
+        foreach (var bar in RhythmEngine.Instance._flattenedBars)
         {
-            SpawnCircleNote(_flatNotes[_spawnIndex]);
-            _spawnIndex++;
-        }
-
-        // 2. 업데이트 및 청소
-        for (int i = _activeNotes.Count - 1; i >= 0; i--)
-        {
-            if (!_activeNotes[i].gameObject.activeSelf)
+            // 아직 생성되지 않았고, 생성 타이밍(마디 시작 시간 - 미리보기 시간)이 되었다면
+            if (!_activeBars.ContainsKey(bar) && bar.startTime <= currentTime + spawnAheadTime)
             {
-                _activeNotes.RemoveAt(i);
-                continue;
+                // 이미 지난 마디가 아니라면 생성
+                if (bar.startTime > currentTime - 0.5f)
+                {
+                    SpawnBar(bar);
+                }
             }
-            _activeNotes[i].UpdatePosition(currentTime, lookAheadTime);
         }
     }
 
-    private void SpawnCircleNote(SubBeatData sb)
+    private void SpawnBar(BarData bar)
     {
-        GameObject go = PoolingManager.Instance.Get("Note");
-        var note = go.GetComponent<UINoteCircle>();
-        note.transform.SetParent(container,false);
+        List<UINoteCircle> notesInBar = new List<UINoteCircle>();
 
-        note.Setup(sb.time, sb.beatTemplate.color, startRadius);
-        _activeNotes.Add(note);
+        foreach (var sb in bar.subBeats)
+        {
+            GameObject go = PoolingManager.Instance.Get("Note");
+            var note = go.GetComponent<UINoteCircle>();
+            note.transform.SetParent(container, false);
+
+            note.Setup(sb.time, bar.barColor, startRadius);
+        }
+
+        _activeBars.Add(bar, notesInBar);
     }
 }

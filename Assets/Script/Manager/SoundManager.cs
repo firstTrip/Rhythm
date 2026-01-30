@@ -1,8 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class SoundManager : MonoSingleton<SoundManager>
 {
+
+    [System.Serializable]
+    public struct SoundData
+    {
+        public SoundType type;
+        public AudioClip clip;
+    }
+
+    public List<SoundData> soundList; // 인스펙터에서 enum과 clip을 매칭
+    private Dictionary<SoundType, AudioClip> _soundDict = new Dictionary<SoundType, AudioClip>();
+
     [Header("Audio Sources")]
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioSource sfxSource; // 단발성 효과음용
@@ -22,10 +34,10 @@ public class SoundManager : MonoSingleton<SoundManager>
 
     private void LoadClips()
     {
-        AudioClip[] clips = Resources.LoadAll<AudioClip>("Sounds");
-        foreach (var clip in clips)
+        foreach (var data in soundList)
         {
-            _audioClips[clip.name] = clip;
+            if (!_soundDict.ContainsKey(data.type))
+                _soundDict.Add(data.type, data.clip);
         }
     }
 
@@ -39,11 +51,16 @@ public class SoundManager : MonoSingleton<SoundManager>
         bgmSource.Play();
     }
 
-    public void PlaySFX(string clipName, float pitch = 1.0f)
+    public void PlaySFX(SoundType type, float pitch = 1.0f, float volume = 1.0f)
     {
-        if (!_audioClips.ContainsKey(clipName)) return;
-
-        sfxSource.pitch = pitch;
-        sfxSource.PlayOneShot(_audioClips[clipName], sfxVolume * masterVolume);
+        if (_soundDict.TryGetValue(type, out AudioClip clip))
+        {
+            sfxSource.pitch = pitch;
+            sfxSource.PlayOneShot(clip, volume);
+        }
+        else
+        {
+            Debug.LogWarning($"[SoundManager] {type}에 해당하는 클립이 없습니다.");
+        }
     }
 }

@@ -10,13 +10,12 @@ public class RhythmEngine : MonoSingleton<RhythmEngine>
     private List<RhythmCircle> _timeline;
     private BarData _lastCheckedBar = null;
     private int _currentBarIndex = 0;
-    private List<BarData> _flattenedBars = new List<BarData>();
+    public List<BarData> _flattenedBars = new List<BarData>();
 
     public void InitEngine(List<RhythmCircle> timeline)
     {
         _timeline = timeline;
 
-        // 최적화를 위해 중첩 리스트(Circle > Bar)를 하나의 리스트(Bar)로 평탄화
         _flattenedBars.Clear();
         foreach (var circle in _timeline)
         {
@@ -24,7 +23,7 @@ public class RhythmEngine : MonoSingleton<RhythmEngine>
         }
 
         RhythmClock.Instance.OnBeat += (beatIndex) => {
-            if (beatIndex == 0) _currentBarIndex++; // 0번 박자가 올 때마다 다음 마디로
+            if (beatIndex == 0) _currentBarIndex++; 
         };
     }
 
@@ -36,97 +35,73 @@ public class RhythmEngine : MonoSingleton<RhythmEngine>
 
     public void ProcessPlayerInput()
     {
-        if (_timeline == null) return;
+        if (_flattenedBars == null || _flattenedBars.Count == 0) return;
 
         float now = RhythmClock.Instance.ElapsedTime;
-        SubBeatData closest = null;
+        SubBeatData closestNote = null;
+        BarData targetBar = null;
         float minDiff = float.MaxValue;
 
+        // 1. 현재 시간 기준으로 앞뒤 1마디씩만 검사 (효율적)
         int start = Mathf.Max(0, _currentBarIndex - 1);
         int end = Mathf.Min(_flattenedBars.Count, _currentBarIndex + 2);
 
         for (int i = start; i < end; i++)
         {
-            foreach (var sb in _flattenedBars[i].subBeats)
+            var bar = _flattenedBars[i];
+            foreach (var sb in bar.subBeats)
             {
+                if (sb.isHit) continue; // 이미 맞춘 노트는 건너뜀
+
                 float diff = Mathf.Abs(sb.time - now);
-                if (diff < minDiff)
+                if (diff < minDiff && diff <= normalRange) // 판정 범위 내 가장 가까운 것
                 {
                     minDiff = diff;
-                    closest = sb;
+                    closestNote = sb;
+                    targetBar = bar; // 이 노트가 속한 마디 저장
                 }
             }
         }
 
-        foreach (var circle in _timeline)
+        // 2. 판정 성공 시
+        if (closestNote != null)
         {
-            foreach (var bar in circle.bars)
+            closestNote.isHit = true;
+            PlayDivisionSound(closestNote);
+
+            if (IsBarFullClear(targetBar))
             {
-                if (Mathf.Abs(bar.startTime - now) > 1.0f) continue;
-
-                foreach (var sb in bar.subBeats)
-                {
-                    float diff = Mathf.Abs(sb.time - now);
-                    if (diff < minDiff)
-                    {
-                        minDiff = diff;
-                        closest = sb;
-                    }
-                }
-            }
-        }
-
-        if (closest != null && minDiff <= normalRange && !closest.isHit)
-        {
-            closest.isHit = true;
-
-            BeatRating rating = minDiff <= perfectRange ? BeatRating.Perfect : BeatRating.Normal;
-        }
-    }
-
-    private void CheckBarOnBeat(int beatIndex)
-    {
-        if (beatIndex == 0)
-        {
-            float now = RhythmClock.Instance.ElapsedTime;
-            BarData lastBar = FindLastCompletedBar(now);
-
-            if (lastBar != null && lastBar != _lastCheckedBar)
-            {
-                _lastCheckedBar = lastBar;
-                VerifyBarCompletion(lastBar);
+                ExecuteBarAttack();
             }
         }
     }
-
-    private BarData FindLastCompletedBar(float now)
+    private void PlayDivisionSound(SubBeatData note)
     {
-        foreach (var circle in _timeline)
+        SoundType sfxName = note.division switch
         {
-            foreach (var bar in circle.bars)
-            {
-                float timeSinceBarStart = now - bar.startTime;
-                if (timeSinceBarStart > 1.8f && timeSinceBarStart < 2.5f)
-                {
-                    return bar;
-                }
-            }
-        }
-        return null;
+            NoteDivision.Half => SoundType.Crash,
+            NoteDivision.Quarter => SoundType.Kick, 
+            NoteDivision.Eighth => SoundType.Snare,       
+            NoteDivision.Sixteenth => SoundType.HiHat,      
+            _ => SoundType.Kick
+        };
+
+        SoundManager.Instance.PlaySFX(sfxName, 1f);
     }
 
-    private void VerifyBarCompletion(BarData bar)
+    private bool IsBarFullClear(BarData bar)
     {
-        bool allHit = bar.subBeats.TrueForAll(sb => sb.isHit);
+        if (bar == null) return false;
 
-        if (allHit)
+        foreach (var sb in bar.subBeats)
         {
-            Debug.Log("<color=yellow>★ BAR CLEAR! 강력한 광역 스킬 발동! ★</color>");
-            Player.Instance.ProcessAttack(BeatRating.Perfect);
+            if (!sb.isHit) return false; // 하나라도 안 맞았으면 실패
         }
-        else
-        {
-            Debug.Log("<color=gray>Bar Failed: 모든 노트를 맞추지 못했습니다.</color>");
-        }
+        return true;
+    }
+
+    private void ExecuteBarAttack()
+    {
+        Debug.Log("마디 완주! 공격 발동!");
     }
 }

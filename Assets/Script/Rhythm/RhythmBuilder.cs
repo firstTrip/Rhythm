@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class RhythmBuilder : MonoSingleton<RhythmBuilder>
 {
+    public Color[] beatColors = { Color.red, Color.blue, Color.green, Color.yellow };
+
     public List<RhythmCircle> Build(
         float songLength,
         float bpm,
@@ -26,6 +28,7 @@ public class RhythmBuilder : MonoSingleton<RhythmBuilder>
             {
                 var bar = new BarData();
                 bar.startTime = timeCursor;
+                bar.barColor = beatColors[b];
 
                 float subCursor = timeCursor;
                 int lane = 0;

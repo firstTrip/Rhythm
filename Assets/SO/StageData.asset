@@ -18,20 +18,20 @@ MonoBehaviour:
   - waveName: 1
     startTime: 0
     endTime: 5
-    spawnInterval: 0
+    spawnInterval: 0.8
     monsterDataList:
     - {fileID: 11400000, guid: ee108b47c70487d4a932199f798e78b5, type: 2}
   - waveName: 2
     startTime: 5
     endTime: 15
-    spawnInterval: 0
+    spawnInterval: 1
     monsterDataList:
     - {fileID: 11400000, guid: ee108b47c70487d4a932199f798e78b5, type: 2}
     - {fileID: 11400000, guid: 4f184010597733142a7305a29dd727c1, type: 2}
   - waveName: 3
     startTime: 15
     endTime: 50
-    spawnInterval: 0
+    spawnInterval: 0.3
     monsterDataList:
     - {fileID: 11400000, guid: 4f184010597733142a7305a29dd727c1, type: 2}
   finalBossKey: 

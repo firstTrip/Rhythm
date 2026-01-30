@@ -640,7 +640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a142903587b8a0c438b65e0308d47dd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentStageData: {fileID: 0}
+  currentStageData: {fileID: 11400000, guid: 49718b88bb93f3541bddb222c7a55628, type: 2}
 --- !u!1 &1171195530
 GameObject:
   m_ObjectHideFlags: 0
@@ -783,6 +783,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9705a3e630944c5439a3299d0b041a3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  soundList:
+  - type: 1
+    clip: {fileID: 8300000, guid: 8be86c58bfe6ea44ab9f85bbf939a44c, type: 3}
+  - type: 2
+    clip: {fileID: 8300000, guid: 5f4bd3e3382aa6d4b847a826bfa52c06, type: 3}
+  - type: 3
+    clip: {fileID: 8300000, guid: b4037f68533e4e24a8ce400aacec7dc9, type: 3}
+  - type: 4
+    clip: {fileID: 8300000, guid: c8a05776daabf1848b4b70692efc3e3d, type: 3}
+  - type: 5
+    clip: {fileID: 8300000, guid: 89b0ef5e4eafa1046a4161a1db02c917, type: 3}
   bgmSource: {fileID: 1171195531}
   sfxSource: {fileID: 1171195531}
   masterVolume: 1

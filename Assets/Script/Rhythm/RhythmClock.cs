@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class RhythmClock : MonoSingleton<RhythmClock>
 {
-    [Header("Metronome Settings")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip tickClip;
     [SerializeField] private bool useMetronome = true;
 
     [Header("Settings")]
@@ -55,8 +52,8 @@ public class RhythmClock : MonoSingleton<RhythmClock>
     }
     private void PlayMetronome(int beatIndex)
     {
-        audioSource.pitch = (beatIndex == 0) ? 1.5f : 1.0f;
-        audioSource.PlayOneShot(tickClip);
+        var pitch = (beatIndex == 0) ? 1.5f : 1.0f;
+        SoundManager.Instance.PlaySFX(SoundType.MetronomeNormal,pitch);
     }
 
     public void StopClock()
