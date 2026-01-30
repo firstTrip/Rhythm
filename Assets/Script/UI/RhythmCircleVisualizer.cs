@@ -3,15 +3,14 @@ using UnityEngine;
 
 public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
 {
-    public GameObject noteCirclePrefab;
-    public RectTransform container;
-
-    public float lookAheadTime = 1.5f;
-    public float startRadius = 400f;
+    [SerializeField] private RectTransform container;
+    [SerializeField] private float lookAheadTime = 1.5f;
+    [SerializeField] private float startRadius = 400f;
 
     private List<UINoteCircle> _activeNotes = new List<UINoteCircle>();
-    private int _spawnIndex = 0;
     private List<SubBeatData> _flatNotes = new List<SubBeatData>();
+
+    private int _spawnIndex = 0;
 
     public void PrepareNotes(List<RhythmCircle> timeline)
     {
@@ -41,7 +40,6 @@ public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
         {
             if (!_activeNotes[i].gameObject.activeSelf)
             {
-                Destroy(_activeNotes[i].gameObject);
                 _activeNotes.RemoveAt(i);
                 continue;
             }
@@ -51,8 +49,9 @@ public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
 
     private void SpawnCircleNote(SubBeatData sb)
     {
-        GameObject go = Instantiate(noteCirclePrefab, container);
+        GameObject go = PoolingManager.Instance.Get("Note");
         var note = go.GetComponent<UINoteCircle>();
+        note.transform.SetParent(container,false);
 
         note.Setup(sb.time, sb.beatTemplate.color, startRadius);
         _activeNotes.Add(note);

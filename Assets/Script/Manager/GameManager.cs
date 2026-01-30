@@ -14,7 +14,7 @@ public class GameManager : MonoSingleton<GameManager>
 
     void Start()
     {
-        NoteDivision[] startPattern = { NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter };
+        NoteDivision[] startPattern = { NoteDivision.Whole, NoteDivision.Whole, NoteDivision.Whole, NoteDivision.Whole};
 
         BeatTemplate[] templates = new BeatTemplate[4];
 
@@ -26,7 +26,7 @@ public class GameManager : MonoSingleton<GameManager>
             templates[i].color = beatColors[i];
         }
 
-        var timeline = RhythmGenerator.Instance.Build(180f, 120f, startPattern, templates);
+        var timeline = RhythmGenerator.Instance.Build(180f, 120, startPattern, templates);
 
         RhythmEngine.Instance.InitEngine(timeline);
 

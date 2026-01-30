@@ -60,6 +60,7 @@ public class RhythmBuilder : MonoSingleton<RhythmBuilder>
             NoteDivision.Quarter => q,
             NoteDivision.Eighth => q * 0.5f,
             NoteDivision.Half => q * 2f,
+            NoteDivision.Whole => q * 4f,
             NoteDivision.Sixteenth => q * 0.25f,
             _ => q
         };

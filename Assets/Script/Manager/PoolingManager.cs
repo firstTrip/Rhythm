@@ -81,7 +81,7 @@ public class PoolingManager : MonoSingleton<PoolingManager>
         }
     }
 
-    public GameObject Get(string key, Vector3 pos, Quaternion rot)
+    public GameObject Get(string key)
     {
         if (!_pools.ContainsKey(key))
         {
@@ -104,7 +104,6 @@ public class PoolingManager : MonoSingleton<PoolingManager>
         }
 
         GameObject obj = _pools[key].Dequeue();
-        obj.transform.SetPositionAndRotation(pos, rot);
         obj.SetActive(true);
         return obj;
     }

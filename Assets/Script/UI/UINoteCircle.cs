@@ -27,6 +27,17 @@ public class UINoteCircle : MonoBehaviour
         float currentRadius = Mathf.Lerp(_minRadius, _startRadius, progress);
         _rect.sizeDelta = new Vector2(currentRadius * 2, currentRadius * 2);
 
-        _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 1f - progress);
+        float alpha = diff > 0 ? 1f - progress : 1f + (diff * 5f);
+        _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, Mathf.Clamp01(alpha));
+
+        if (diff < -0.15f)
+        {
+            OnMiss();
+        }
+    }
+
+    private void OnMiss()
+    {
+        PoolingManager.Instance.Release(this.gameObject);
     }
 }

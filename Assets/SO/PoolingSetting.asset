@@ -21,4 +21,7 @@ MonoBehaviour:
     monsterPrefab: {fileID: 3809764223866473688, guid: ff153adefbc865844b89b343f256d1c2, type: 3}
     preloadCount: 10
     relatedEffects: []
-  commonPools: []
+  commonPools:
+  - name: Note
+    prefab: {fileID: 5091753762844981191, guid: 3605d67e6d487fc498ca0bdc0e87bf19, type: 3}
+    preloadCount: 30

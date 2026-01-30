@@ -15,8 +15,9 @@ public class Player : MonoSingleton<Player>
     [Header("Visuals")]
     public SpriteRenderer spriteRenderer;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         PlayerManager.Instance.RegisterPlayer(this.transform, this);
     }
 

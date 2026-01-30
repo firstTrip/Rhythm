@@ -8,6 +8,7 @@ public class RhythmGenerator : MonoSingleton<RhythmGenerator>
 
     public List<RhythmCircle> currentTimeline;
 
+    public List<BeatTemplate[]> beatTemplates;
 
     public void RebuildTimeline(float currentTime, float songLength, float bpm)
     {

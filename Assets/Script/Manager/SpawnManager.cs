@@ -96,12 +96,12 @@ public class SpawnManager : MonoSingleton<SpawnManager>
         Vector3 spawnPos = GetRandomSpawnPosition();
 
         // 2. SO에 적혀있는 poolKey를 이용해 풀에서 프리팹 추출
-        GameObject go = PoolingManager.Instance.Get(selectedData.name, spawnPos, Quaternion.identity);
+        GameObject go = PoolingManager.Instance.Get(selectedData.name);
 
         if (go != null)
         {
             CreatureBase monster = go.GetComponent<CreatureBase>();
-
+            monster.transform.position = spawnPos;
             // 3. 몬스터에게 직접 SO를 주입 (Dependency Injection)
             // 몬스터는 이제 자신이 어떤 데이터를 써야 할지 스스로 알 필요가 없습니다.
             monster.Init(selectedData, _player, _elapsedTime);
@@ -113,10 +113,11 @@ public class SpawnManager : MonoSingleton<SpawnManager>
         _isBossSpawned = true;
         Vector3 spawnPos = GetRandomSpawnPosition();
 
-        GameObject go = PoolingManager.Instance.Get(_stage.finalBossKey, spawnPos, Quaternion.identity);
+        GameObject go = PoolingManager.Instance.Get(_stage.finalBossKey);
         if (go != null)
         {
             CreatureBase boss = go.GetComponent<CreatureBase>();
+            go.transform.position = spawnPos;
             //boss.Init(_player);
 
             //// 보스도 스테이지 배율 적용

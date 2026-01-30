@@ -2,9 +2,14 @@ using UnityEngine;
 
 public class RhythmClock : MonoSingleton<RhythmClock>
 {
+    [Header("Metronome Settings")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip tickClip;
+    [SerializeField] private bool useMetronome = true;
+
     [Header("Settings")]
-    public float bpm = 120f;
-    public float stageDuration = 180f;
+    [SerializeField] public float bpm = 120f;
+    [SerializeField] public float stageDuration = 180f;
 
     public float ElapsedTime { get; private set; }
     public bool IsRunning { get; private set; } = false;
@@ -43,8 +48,15 @@ public class RhythmClock : MonoSingleton<RhythmClock>
             _lastBeatCount = currentBeatCount;
             int beatInBar = _lastBeatCount % 4;
             OnBeat?.Invoke(beatInBar);
-
+            
+            if (useMetronome)
+                PlayMetronome(beatInBar);
         }
+    }
+    private void PlayMetronome(int beatIndex)
+    {
+        audioSource.pitch = (beatIndex == 0) ? 1.5f : 1.0f;
+        audioSource.PlayOneShot(tickClip);
     }
 
     public void StopClock()
