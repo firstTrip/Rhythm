@@ -6,4 +6,6 @@ public class BarData
     public float startTime;
     public Color barColor;
     public List<SubBeatData> subBeats = new();
+
+    public bool isFailed = false;
 }

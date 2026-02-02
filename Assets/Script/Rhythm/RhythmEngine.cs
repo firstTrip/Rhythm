@@ -12,15 +12,12 @@ public class RhythmEngine : MonoSingleton<RhythmEngine>
     private int _currentBarIndex = 0;
     public List<BarData> _flattenedBars = new List<BarData>();
 
-    public void InitEngine(List<RhythmCircle> timeline)
+    [SerializeField] private float hitThreshold = 0.15f; 
+    [SerializeField] private float missThreshold = 0.3f;
+    public void InitEngine(List<BarData> timeline)
     {
-        _timeline = timeline;
-
         _flattenedBars.Clear();
-        foreach (var circle in _timeline)
-        {
-            _flattenedBars.AddRange(circle.bars);
-        }
+        _flattenedBars = timeline;
 
         RhythmClock.Instance.OnBeat += (beatIndex) => {
             if (beatIndex == 0) _currentBarIndex++; 
@@ -30,51 +27,65 @@ public class RhythmEngine : MonoSingleton<RhythmEngine>
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
-            ProcessPlayerInput();
+        {
+            var (closestNote, targetBar) = GetClosestNote();
+
+            if (closestNote == null || targetBar == null) return;
+
+            float now = RhythmClock.Instance.ElapsedTime;
+            float diff = Mathf.Abs(closestNote.time - now);
+
+            if (targetBar.isFailed) return;
+
+            if (diff <= hitThreshold)
+            {
+                closestNote.isHit = true;
+                ExecuteBasicAttack(targetBar.barColor);
+                RhythmCircleVisualizer.Instance.RemoveNote(closestNote, targetBar);
+
+                if (CheckBarComplete(targetBar))
+                {
+                    ExecuteBarCompleteAttack(targetBar.barColor);
+                }
+            }
+            else
+            {
+                targetBar.isFailed = true;
+                RhythmCircleVisualizer.Instance.SetBarColorGray(targetBar);
+            }
+        }
     }
 
-    public void ProcessPlayerInput()
+    private (SubBeatData note, BarData bar) GetClosestNote()
     {
-        if (_flattenedBars == null || _flattenedBars.Count == 0) return;
-
         float now = RhythmClock.Instance.ElapsedTime;
-        SubBeatData closestNote = null;
-        BarData targetBar = null;
+        SubBeatData bestNote = null;
+        BarData bestBar = null;
         float minDiff = float.MaxValue;
 
-        // 1. 현재 시간 기준으로 앞뒤 1마디씩만 검사 (효율적)
-        int start = Mathf.Max(0, _currentBarIndex - 1);
-        int end = Mathf.Min(_flattenedBars.Count, _currentBarIndex + 2);
-
-        for (int i = start; i < end; i++)
+        foreach (var bar in _flattenedBars)
         {
-            var bar = _flattenedBars[i];
+            if (bar.startTime > now + 1.0f) continue;
+            if (bar.startTime < now - 1.0f) continue;
+
             foreach (var sb in bar.subBeats)
             {
-                if (sb.isHit) continue; // 이미 맞춘 노트는 건너뜀
+                if (sb.isHit) continue; 
 
                 float diff = Mathf.Abs(sb.time - now);
-                if (diff < minDiff && diff <= normalRange) // 판정 범위 내 가장 가까운 것
+                if (diff < minDiff)
                 {
                     minDiff = diff;
-                    closestNote = sb;
-                    targetBar = bar; // 이 노트가 속한 마디 저장
+                    bestNote = sb;
+                    bestBar = bar;
                 }
             }
         }
 
-        // 2. 판정 성공 시
-        if (closestNote != null)
-        {
-            closestNote.isHit = true;
-            PlayDivisionSound(closestNote);
-
-            if (IsBarFullClear(targetBar))
-            {
-                ExecuteBarAttack();
-            }
-        }
+        return (bestNote, bestBar);
     }
+
+   
     private void PlayDivisionSound(SubBeatData note)
     {
         SoundType sfxName = note.division switch
@@ -89,19 +100,30 @@ public class RhythmEngine : MonoSingleton<RhythmEngine>
         SoundManager.Instance.PlaySFX(sfxName, 1f);
     }
 
-    private bool IsBarFullClear(BarData bar)
+    private bool CheckBarComplete(BarData bar)
     {
-        if (bar == null) return false;
+        if (bar.isFailed) return false;
 
         foreach (var sb in bar.subBeats)
         {
-            if (!sb.isHit) return false; // 하나라도 안 맞았으면 실패
+            if (!sb.isHit) return false;
         }
+
         return true;
     }
 
-    private void ExecuteBarAttack()
+    private void ExecuteBasicAttack(Color attackColor)
     {
-        Debug.Log("마디 완주! 공격 발동!");
+        Debug.Log($"<color=white>단타 공격!</color> 색상: {attackColor}");
+
+        // ProjectileManager.Instance.FireSmall(attackColor);
+    }
+
+    private void ExecuteBarCompleteAttack(Color attackColor)
+    {
+        Debug.Log($"<color=#{ColorUtility.ToHtmlStringRGB(attackColor)}><b> 마디 완주! 추가 강력 공격 발동!! </b></color>");
+
+        // Player.Instance.PlayHeavyAttackAnimation();
+        // EffectManager.Instance.SpawnBigExplosion(attackColor);
     }
 }

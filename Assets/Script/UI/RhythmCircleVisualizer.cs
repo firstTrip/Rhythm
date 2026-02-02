@@ -4,36 +4,23 @@ using UnityEngine;
 public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
 {
     [SerializeField] private RectTransform container;
-    [SerializeField] private float lookAheadTime = 1.5f;
     [SerializeField] private float startRadius = 400f;
 
-    private List<UINoteCircle> _activeNotes = new List<UINoteCircle>();
-    private List<SubBeatData> _flatNotes = new List<SubBeatData>();
+    [SerializeField] private float spawnAheadTime = 1.0f; 
 
-    [SerializeField] private float spawnAheadTime = 1.0f; // 노트를 실제 시간보다 얼마나 미리 생성할지
-
-    // 마디(BarData)를 키값으로 하여, 그 마디에 속한 UI 원(UINoteCircle)들을 리스트로 관리합니다.
     private Dictionary<BarData, List<UINoteCircle>> _activeBars = new Dictionary<BarData, List<UINoteCircle>>();
-
-    private int _spawnIndex = 0;
-
-    public void PrepareNotes(List<RhythmCircle> timeline)
-    {
-        _flatNotes.Clear();
-        _spawnIndex = 0;
-
-        foreach (var circle in timeline)
-            foreach (var bar in circle.bars)
-                _flatNotes.AddRange(bar.subBeats);
-    }
-
+    private List<BarData> _keysToRemove = new List<BarData>();
     void Update()
     {
         if (RhythmEngine.Instance._flattenedBars == null) return;
 
         float now = RhythmClock.Instance.ElapsedTime;
+
         CheckAndSpawnBars(now);
+
+        UpdateActiveNotes(now);
     }
+
     private void CheckAndSpawnBars(float currentTime)
     {
         foreach (var bar in RhythmEngine.Instance._flattenedBars)
@@ -60,9 +47,76 @@ public class RhythmCircleVisualizer : MonoSingleton<RhythmCircleVisualizer>
             var note = go.GetComponent<UINoteCircle>();
             note.transform.SetParent(container, false);
 
-            note.Setup(sb.time, bar.barColor, startRadius);
+            note.Setup(sb, bar, bar.barColor, startRadius);
+
+            notesInBar.Add(note);
         }
 
         _activeBars.Add(bar, notesInBar);
+    }
+
+    private void UpdateActiveNotes(float now)
+    {
+        _keysToRemove.Clear();
+
+        foreach (var kvp in _activeBars)
+        {
+            BarData bar = kvp.Key;
+            List<UINoteCircle> notes = kvp.Value;
+
+            if (bar.startTime <= now + spawnAheadTime)
+            {
+                for (int i = notes.Count - 1; i >= 0; i--)
+                {
+                    if (!notes[i].UpdatePosition(now, spawnAheadTime))
+                    {
+                        notes.RemoveAt(i);
+                    }
+                }
+            }
+
+            if (notes.Count == 0)
+            {
+                _keysToRemove.Add(bar);
+            }
+        }
+
+        foreach (var key in _keysToRemove)
+        {
+            _activeBars.Remove(key);
+        }
+    }
+
+    public void RemoveNote(SubBeatData sb, BarData parentBar)
+    {
+        if (parentBar != null && _activeBars.TryGetValue(parentBar, out var notes))
+        {
+            UINoteCircle target = notes.Find(n => n.Data == sb);
+
+            if (target != null)
+            {
+                notes.Remove(target);
+                PoolingManager.Instance.Release(target.gameObject);
+            }
+
+            if (notes.Count == 0)
+            {
+                _activeBars.Remove(parentBar);
+            }
+        }
+    }
+
+    public void SetBarColorGray(BarData bar)
+    {
+        if (_activeBars.TryGetValue(bar, out var notes))
+        {
+            foreach (var note in notes)
+            {
+                if (note != null)
+                {
+                    note.SetColor(new Color(0.5f, 0.5f, 0.5f));
+                }
+            }
+        }
     }
 }

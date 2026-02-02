@@ -8,28 +8,19 @@ public class GameManager : MonoSingleton<GameManager>
     public float stageTime = 180f;
     [Header("Initial Pattern")]
     public NoteDivision[] startingPattern = { NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter };
+    public Color[] beatColors = { Color.red, Color.blue, Color.green, Color.yellow };
 
     public bool IsGameOver { get; private set; }
 
     void Start()
     {
-        NoteDivision[] startPattern = { NoteDivision.Whole, NoteDivision.Whole, NoteDivision.Whole, NoteDivision.Whole};
+        NoteDivision[] startPattern = { NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter, NoteDivision.Quarter };
 
-        BeatTemplate[] templates = new BeatTemplate[4];
-
-        for (int i = 0; i < templates.Length; i++)
-        {
-            templates[i] = new BeatTemplate();
-            templates[i].laneIndex = i;
-        }
-
-        var timeline = RhythmGenerator.Instance.Build(180f, 120, startPattern, templates);
+        var timeline = RhythmGenerator.Instance.Build(180f, 120, startPattern, beatColors);
 
         RhythmEngine.Instance.InitEngine(timeline);
 
         RhythmClock.Instance.StartClock();
-
-        RhythmCircleVisualizer.Instance.PrepareNotes(timeline);
     }
 
     public void StartNewStage()
@@ -37,10 +28,9 @@ public class GameManager : MonoSingleton<GameManager>
         IsGameOver = false;
         Time.timeScale = 1f;
 
-        var templates = new BeatTemplate[4];
-        List<RhythmCircle> newTimeline = RhythmGenerator.Instance.Build(stageTime, bpm, startingPattern, templates);
+       // List<RhythmCircle> newTimeline = RhythmGenerator.Instance.Build(stageTime, bpm, startingPattern, templates);
 
-        RhythmEngine.Instance.InitEngine(newTimeline);
+       // RhythmEngine.Instance.InitEngine(newTimeline);
 
         RhythmClock.Instance.bpm = bpm;
         RhythmClock.Instance.stageDuration = stageTime;

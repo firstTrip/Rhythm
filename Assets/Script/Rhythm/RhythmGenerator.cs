@@ -4,66 +4,46 @@ using UnityEngine;
 public class RhythmGenerator : MonoSingleton<RhythmGenerator>
 {
     private NoteDivision[] _currentPattern;
-    private BeatTemplate[] _currentTemplates;
 
-    public List<RhythmCircle> currentTimeline;
-    public Color[] beatColors = { Color.red, Color.blue, Color.green, Color.yellow };
 
-    public List<BeatTemplate[]> beatTemplates;
-
-    public void RebuildTimeline(float currentTime, float songLength, float bpm)
-    {
-        currentTimeline = Build(songLength, bpm, _currentPattern, _currentTemplates, currentTime);
-    }
-
-    public List<RhythmCircle> Build(
+    public List<BarData> Build(
         float songLength,
         float bpm,
         NoteDivision[] pattern,
-        BeatTemplate[] templates,
+        Color[] barColors,
         float startTime = 0f) 
     {
+        List<BarData> flattenedBars = new List<BarData>();
+
         float secPerQuarter = 60f / bpm;
-        float barLength = secPerQuarter * 4;
-        float circleLength = barLength * 4;
+        float secPerBar = secPerQuarter * 4f; 
 
-        int totalCircles = Mathf.FloorToInt((songLength - startTime) / circleLength);
-        float timeCursor = startTime;
+        int totalBars = Mathf.CeilToInt(songLength / secPerBar);
 
-        var circles = new List<RhythmCircle>();
+        float timeCursor = 0f;
 
-        for (int c = 0; c < totalCircles; c++)
+        for (int b = 0; b < totalBars; b++)
         {
-            var circle = new RhythmCircle();
-            for (int b = 0; b < 4; b++)
+            BarData bar = new BarData();
+
+            bar.barColor = barColors[b % barColors.Length];
+            bar.startTime = timeCursor;
+
+            float subCursor = timeCursor;
+            for (int i = 0; i < pattern.Length; i++)
             {
-                var bar = new BarData();
-                bar.startTime = timeCursor;
-                bar.barColor = beatColors[b];
-
-                float subCursor = timeCursor;
-                int lane = 0;
-
-                foreach (var div in pattern)
+                bar.subBeats.Add(new SubBeatData
                 {
-                    float difficultyWeight = GetDifficultyWeight(div);
-
-                    bar.subBeats.Add(new SubBeatData
-                    {
-                        time = subCursor,
-                        division = div,
-                        beatTemplate = templates[lane % 4],
-                    });
-
-                    subCursor += DivisionToSeconds(div, secPerQuarter);
-                    lane++;
-                }
-                timeCursor += barLength;
-                circle.bars.Add(bar);
+                    time = subCursor,
+                    division = pattern[i]
+                });
+                subCursor += DivisionToSeconds(pattern[i], secPerQuarter);
             }
-            circles.Add(circle);
+
+            flattenedBars.Add(bar);
+            timeCursor += secPerBar;
         }
-        return circles;
+        return flattenedBars;
     }
 
     private float GetDifficultyWeight(NoteDivision div)
