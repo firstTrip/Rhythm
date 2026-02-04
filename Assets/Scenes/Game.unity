@@ -338,8 +338,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   container: {fileID: 1698700906}
-  lookAheadTime: 1.5
   startRadius: 400
+  spawnAheadTime: 1
 --- !u!1 &282395498
 GameObject:
   m_ObjectHideFlags: 0
@@ -1046,12 +1046,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bpm: 120
   stageTime: 180
+  startingPattern: 00000000010000000200000000000000
   beatColors:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  startingPattern: 00000000010000000200000000000000
 --- !u!4 &2028346610
 Transform:
   m_ObjectHideFlags: 0
@@ -1079,8 +1079,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec46fccfaea207842bdd23dafc83a3fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioSource: {fileID: 1171195531}
-  tickClip: {fileID: 8300000, guid: 8be86c58bfe6ea44ab9f85bbf939a44c, type: 3}
   useMetronome: 1
   bpm: 120
   stageDuration: 180
@@ -1137,6 +1135,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1741309302839918055, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
+      propertyPath: m_Size.x
+      value: 8.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 1741309302839918055, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
+      propertyPath: m_Size.y
+      value: 12.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 1741309302839918055, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 8793639957104055765, guid: ded98d8103797d64db29b4423311715f, type: 3}
+    - target: {fileID: 1741309302839918055, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112214719515375856, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2112214719515375856, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 2112214719515375856, guid: 3ca64f6935370e549bea2d0971876dd4, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
